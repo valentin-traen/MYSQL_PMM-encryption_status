@@ -21,7 +21,7 @@ DECLARE master_key_exists TINYINT;
 ALTER INSTANCE ROTATE INNODB MASTER KEY;
 
 SELECT CURRENT_DATE INTO master_key_creation_date;
-SELECT MAX(SUBSTRING_INDEX(KEY_ID, '-', -1)) INTO master_key_number FROM performance_schema.keyring_keys WHERE KEY_ID REGEXP '^(INNODBKey).*-[0-9]+$';
+SELECT MAX(CAST(SUBSTRING_INDEX(KEY_ID, '-', -1) AS UNSIGNED)) INTO master_key_number FROM performance_schema.keyring_keys WHERE KEY_ID REGEXP '^(INNODBKey).*-[0-9]+$';
 SELECT EXISTS(SELECT * from mysql.pmm_custom_informations_keys_rotation WHERE master_key_type='innodb') INTO master_key_exists;
 SELECT DATE(STARTS) FROM information_schema.EVENTS WHERE EVENT_NAME = 'event_rotate_innodb_master_key' INTO master_key_next_rotation;
 
@@ -57,7 +57,7 @@ DECLARE master_key_exists TINYINT;
 ALTER INSTANCE ROTATE BINLOG MASTER KEY;
 
 SELECT CURRENT_DATE INTO master_key_creation_date;
-SELECT MAX(SUBSTRING_INDEX(KEY_ID, '_', -1)) INTO master_key_number FROM performance_schema.keyring_keys WHERE KEY_ID REGEXP '^(MySQLReplicationKey).*_[0-9]+$';
+SELECT MAX(CAST(SUBSTRING_INDEX(KEY_ID, '-', -1) AS UNSIGNED)) INTO master_key_number FROM performance_schema.keyring_keys WHERE KEY_ID REGEXP '^(MySQLReplicationKey).*_[0-9]+$';
 SELECT EXISTS(SELECT * from mysql.pmm_custom_informations_keys_rotation WHERE master_key_type='binary') INTO master_key_exists;
 SELECT DATE(STARTS) FROM information_schema.EVENTS WHERE EVENT_NAME = 'event_rotate_innodb_master_key' INTO master_key_next_rotation;
 
