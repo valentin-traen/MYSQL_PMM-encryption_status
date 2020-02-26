@@ -1,0 +1,78 @@
+mysql_custom_metric_encryption_states:
+  query: "SELECT IF(INNODB_ENCRYPTION_STATE='ON',1,IF(EXISTS(SELECT TABLE_SCHEMA FROM INFORMATION_SCHEMA.TABLES WHERE CREATE_OPTIONS like '%ENCRYPTION%Y%'),2,0)) as 'INNODB_ENCRYPTION_STATE', IF(BINLOG_ENCRYPTION_STATE='ON',1,0) AS BINLOG_ENCRYPTION_STATE, IF(REDOLOG_ENCRYPTION_STATE='ON',1,0) AS REDOLOG_ENCRYPTION_STATE, IF(TEMPINNODB_ENCRYPTION_STATE,1,0) AS TEMPINNODB_ENCRYPTION_STATE, IF(UNDO_ENCRYPTION_STATE='ON',1,0) AS UNDO_ENCRYPTION_STATE FROM (SELECT (select variable_value from performance_schema.global_variables where variable_name = 'default_table_encryption') as INNODB_ENCRYPTION_STATE, (select variable_value  from performance_schema.global_variables where variable_name = 'binlog_encryption') as BINLOG_ENCRYPTION_STATE, (select variable_value from performance_schema.global_variables where variable_name = 'innodb_redo_log_encrypt') as REDOLOG_ENCRYPTION_STATE , (select variable_value from performance_schema.global_variables where variable_name = 'innodb_temp_tablespace_encrypt') as TEMPINNODB_ENCRYPTION_STATE, (select variable_value from performance_schema.global_variables where variable_name = 'innodb_undo_log_encrypt') as UNDO_ENCRYPTION_STATE) sq1"
+  metrics:
+    - INNODB_ENCRYPTION_STATE:
+        usage: "GAUGE"
+        description: "State of innodb encryption. 0=OFF, 1=ON, 2=manually activated"
+    - BINLOG_ENCRYPTION_STATE:
+        usage: "GAUGE"
+        description: "State of binlog encryption"
+    - REDOLOG_ENCRYPTION_STATE:
+        usage: "GAUGE"
+        description: "State of redo logs encryption"
+    - TEMPINNODB_ENCRYPTION_STATE:
+        usage: "GAUGE"
+        description: "State of temp innodb encryption"
+    - UNDO_ENCRYPTION_STATE:
+        usage: "GAUGE"
+        description: "State of undo tablespace encryption"
+mysql_custom_metric_encrypted_tables:
+  query: "SELECT TABLE_SCHEMA, TABLE_NAME, 0 as 'ENCRYPTED' FROM INFORMATION_SCHEMA.TABLES WHERE CREATE_OPTIONS like 'ENCRYPTION%Y%'"
+  metrics:
+    - TABLE_SCHEMA:
+        usage: "LABEL"
+        description: "database name"
+    - TABLE_NAME:
+        usage: "LABEL"
+        description: "table name"
+    - ENCRYPTED:
+        usage: "GAUGE"
+        description: "0"
+mysql_custom_metric_encryption_innodb_master_key:
+  query: "SELECT 0 as MKINFORMATION, master_key_number AS MASTER_KEY_NUMBER, master_key_creation_date AS MASTER_KEY_CREATION_DATE, master_key_next_rotation AS MASTER_KEY_NEXT_ROTATION FROM mysql.pmm_custom_informations_keys_rotation WHERE master_key_type='innodb'"
+  metrics:
+    - MKINFORMATION:
+        usage: "GAUGE"
+        description: "fixed"
+    - MASTER_KEY_NUMBER:
+        usage: "LABEL"
+        description: "Number of master key rotations"
+    - MASTER_KEY_CREATION_DATE:
+        usage: "LABEL"
+        description: "innodb master key creation date"
+    - MASTER_KEY_NEXT_ROTATION:
+        usage: "LABEL"
+        description: "innodb master key next rotation"
+mysql_custom_metric_encryption_binary_master_key:
+  query: "SELECT  0 as MKINFORMATION, master_key_number AS MASTER_KEY_NUMBER, master_key_creation_date AS MASTER_KEY_CREATION_DATE, master_key_next_rotation AS MASTER_KEY_NEXT_ROTATION FROM mysql.pmm_custom_informations_keys_rotation WHERE master_key_type='binary'"
+  metrics:
+    - MKINFORMATION:
+        usage: "GAUGE"
+        description: "fixed"
+    - MASTER_KEY_NUMBER:
+        usage: "LABEL"
+        description: "Number of master key rotations"
+    - MASTER_KEY_CREATION_DATE:
+        usage: "LABEL"
+        description: "binary master key creation date"
+    - MASTER_KEY_NEXT_ROTATION:
+        usage: "LABEL"
+        description: "binary master key next rotation"
+mysql_custom_metric_innodb_encryption_progress:
+  query: "SELECT IF(encryption_exists=0,100,(SELECT WORK_COMPLETED*100/WORK_ESTIMATED FROM performance_schema.events_stages_current)) as ENCRYPTION_PROGESS FROM (SELECT EXISTS(SELECT WORK_COMPLETED*100/WORK_ESTIMATED FROM performance_schema.events_stages_current) AS encryption_exists) sq1"
+  metrics:
+    - ENCRYPTION_PROGESS:
+        usage: "GAUGE"
+        description: "innodb_encryption_progress"
+mysql_custom_metric_binlog_informations:
+  query: "SHOW BINARY LOGS"
+  metrics:
+    - Log_name:
+        usage: "LABEL"
+        description: "name of bin log"
+    - File_size:
+        usage: "GAUGE"
+        description: "size of bin log"
+    - Encrypted:
+        usage: "LABEL"
+        description: "encrypted status of bin log"
