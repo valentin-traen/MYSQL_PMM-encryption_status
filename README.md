@@ -4,4 +4,4 @@ This is a PMM dashboard made for manage the MySQL Encryption processes. You can 
 
 You need to edit your PMM custom metric file (default : /usr/local/percona/pmm-client/queries-mysqld.yml) with the file queries-mysqld.yml
 
-You also need to execute the .sql file to get the informations requiered.
+You also need to execute the .sql file to get the informations requiered (edit the events to change the frequency of rotation of the keys)
