@@ -1,3 +1,5 @@
+UPDATE performance_schema.setup_instruments SET ENABLED = 'YES' WHERE NAME LIKE 'stage/innodb/alter tablespace (encryption)';
+
 CREATE TABLE mysql.pmm_custom_informations_keys_rotation
 (
   master_key_type ENUM('innodb','binary') PRIMARY KEY,
